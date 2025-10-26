@@ -1,73 +1,240 @@
-# Welcome to your Lovable project
+# 👓 Lux-Vision - Premium Eyewear E-Commerce Platform
 
-## Project info
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![React](https://img.shields.io/badge/React-18.3.1-blue.svg)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-blue.svg)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-5.4.19-purple.svg)](https://vitejs.dev/)
 
-**URL**: https://lovable.dev/projects/0a6b8945-1ea4-40e1-aa3f-a98970d7ee43
+Une plateforme e-commerce moderne et élégante spécialisée dans la vente de lunettes de vue et de soleil, développée avec React, TypeScript et Tailwind CSS.
 
-## How can I edit this code?
+![Lux-Vision Banner](./src/assets/hero-eyewear.jpg)
 
-There are several ways of editing your application.
+## ✨ Fonctionnalités
 
-**Use Lovable**
+### 🛍️ E-Commerce
+- **Catalogue de produits** avec filtres et recherche
+- **Panier d'achat** persistant (localStorage)
+- **Pages produits détaillées** avec galerie d'images
+- **Processus de checkout** complet
+- **Système de wishlist/favoris**
+- **Comparateur de produits**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/0a6b8945-1ea4-40e1-aa3f-a98970d7ee43) and start prompting.
+### 🎨 Interface Utilisateur
+- **Design responsive** adapté à tous les écrans
+- **Composants UI modernes** avec shadcn-ui
+- **Animations fluides** et transitions
+- **Mode sombre/clair** (à venir)
+- **Accessibilité WCAG 2.1**
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🔐 Authentification
+- **Inscription/Connexion** utilisateur
+- **Gestion de profil**
+- **Récupération de mot de passe**
 
-**Use your preferred IDE**
+### 📱 Pages
+- 🏠 **Accueil** - Page d'accueil attrayante
+- 🛒 **Boutique** - Catalogue complet avec filtres
+- 📦 **Détail Produit** - Informations détaillées
+- 🛍️ **Panier** - Gestion du panier
+- 💳 **Checkout** - Processus d'achat
+- 👤 **Authentification** - Connexion/Inscription
+- ℹ️ **À propos** - Information sur la marque
+- 📞 **Contact** - Formulaire de contact
+- ❓ **FAQ** - Questions fréquentes
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🚀 Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Prérequis
+- **Node.js** >= 18.0.0
+- **npm** >= 9.0.0 ou **yarn** >= 1.22.0
 
-Follow these steps:
+### Étapes d'installation
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+```bash
+# 1. Cloner le repository
+git clone https://github.com/Valerdy/Lux-Vision.git
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# 2. Naviguer dans le dossier
+cd Lux-Vision
 
-# Step 3: Install the necessary dependencies.
-npm i
+# 3. Installer les dépendances
+npm install
+# ou
+yarn install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 4. Créer un fichier .env à partir de .env.example
+cp .env.example .env
+
+# 5. Démarrer le serveur de développement
 npm run dev
+# ou
+yarn dev
 ```
 
-**Edit a file directly in GitHub**
+L'application sera accessible sur `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📦 Scripts Disponibles
 
-**Use GitHub Codespaces**
+```bash
+# Développement
+npm run dev          # Démarre le serveur de développement
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Build
+npm run build        # Build de production
+npm run build:dev    # Build de développement
 
-## What technologies are used for this project?
+# Qualité du code
+npm run lint         # Vérifie le code avec ESLint
 
-This project is built with:
+# Preview
+npm run preview      # Preview du build de production
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🛠️ Technologies Utilisées
 
-## How can I deploy this project?
+### Core
+- **[React](https://reactjs.org/)** 18.3.1 - Bibliothèque UI
+- **[TypeScript](https://www.typescriptlang.org/)** 5.8.3 - Typage statique
+- **[Vite](https://vitejs.dev/)** 5.4.19 - Build tool ultra-rapide
 
-Simply open [Lovable](https://lovable.dev/projects/0a6b8945-1ea4-40e1-aa3f-a98970d7ee43) and click on Share -> Publish.
+### UI & Styling
+- **[Tailwind CSS](https://tailwindcss.com/)** 3.4.17 - Framework CSS utility-first
+- **[shadcn-ui](https://ui.shadcn.com/)** - Composants UI réutilisables
+- **[Radix UI](https://www.radix-ui.com/)** - Primitives UI accessibles
+- **[Lucide React](https://lucide.dev/)** - Icônes modernes
 
-## Can I connect a custom domain to my Lovable project?
+### State Management & Data
+- **[React Query](https://tanstack.com/query/latest)** - Gestion du cache et des requêtes
+- **[React Hook Form](https://react-hook-form.com/)** - Gestion des formulaires
+- **[Zod](https://zod.dev/)** - Validation des schémas
 
-Yes, you can!
+### Routing
+- **[React Router](https://reactrouter.com/)** 6.30.1 - Routing côté client
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Autres
+- **[date-fns](https://date-fns.org/)** - Manipulation de dates
+- **[Sonner](https://sonner.emilkowal.ski/)** - Notifications toast
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 📁 Structure du Projet
+
+```
+Lux-Vision/
+├── public/              # Assets statiques
+│   ├── favicon.ico
+│   ├── placeholder.svg
+│   └── robots.txt
+├── src/
+│   ├── assets/         # Images et médias
+│   ├── components/     # Composants réutilisables
+│   │   ├── ui/        # Composants shadcn-ui
+│   │   ├── Footer.tsx
+│   │   ├── Navbar.tsx
+│   │   ├── ProductCard.tsx
+│   │   └── ProductFilter.tsx
+│   ├── contexts/      # Contexts React (State global)
+│   │   └── CartContext.tsx
+│   ├── data/          # Données statiques
+│   │   └── products.ts
+│   ├── hooks/         # Custom hooks
+│   ├── lib/           # Utilitaires et helpers
+│   ├── pages/         # Pages de l'application
+│   │   ├── Index.tsx
+│   │   ├── Shop.tsx
+│   │   ├── ProductDetail.tsx
+│   │   ├── Cart.tsx
+│   │   ├── Checkout.tsx
+│   │   ├── Auth.tsx
+│   │   ├── About.tsx
+│   │   ├── Contact.tsx
+│   │   └── NotFound.tsx
+│   ├── App.tsx        # Composant principal
+│   ├── main.tsx       # Point d'entrée
+│   └── index.css      # Styles globaux
+├── .env.example       # Variables d'environnement exemple
+├── .gitignore
+├── components.json    # Configuration shadcn-ui
+├── eslint.config.js   # Configuration ESLint
+├── index.html
+├── package.json
+├── postcss.config.js
+├── tailwind.config.ts # Configuration Tailwind
+├── tsconfig.json      # Configuration TypeScript
+└── vite.config.ts     # Configuration Vite
+```
+
+## 🎨 Personnalisation
+
+### Thème Tailwind
+Modifiez `tailwind.config.ts` pour personnaliser les couleurs, les fonts, etc.
+
+### Composants shadcn-ui
+Ajoutez de nouveaux composants avec :
+```bash
+npx shadcn-ui@latest add [component-name]
+```
+
+## 🌍 Variables d'Environnement
+
+Créez un fichier `.env` à la racine du projet :
+
+```env
+# API Configuration (à venir)
+VITE_API_URL=http://localhost:3000/api
+
+# App Configuration
+VITE_APP_NAME=Lux-Vision
+VITE_APP_URL=http://localhost:5173
+
+# Feature Flags
+VITE_ENABLE_ANALYTICS=false
+```
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues ! Voici comment contribuer :
+
+1. Fork le projet
+2. Créez votre branche feature (`git checkout -b feature/AmazingFeature`)
+3. Committez vos changements (`git commit -m 'Add some AmazingFeature'`)
+4. Push vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrez une Pull Request
+
+## 📝 Roadmap
+
+- [ ] Intégration backend (API REST)
+- [ ] Système de paiement (Stripe/PayPal)
+- [ ] Authentification JWT
+- [ ] Base de données (PostgreSQL)
+- [ ] Gestion des stocks
+- [ ] Système d'avis clients
+- [ ] Mode sombre
+- [ ] PWA (Progressive Web App)
+- [ ] Tests unitaires et E2E
+- [ ] Multilingue (i18n)
+- [ ] Analytics et monitoring
+
+## 📄 License
+
+Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+## 👥 Auteurs
+
+- **Valerdy** - [GitHub](https://github.com/Valerdy)
+
+## 🙏 Remerciements
+
+- [shadcn-ui](https://ui.shadcn.com/) pour les magnifiques composants
+- [Radix UI](https://www.radix-ui.com/) pour les primitives accessibles
+- [Lucide](https://lucide.dev/) pour les icônes
+- La communauté React et TypeScript
+
+## 📞 Support
+
+Pour toute question ou support :
+- 📧 Email : support@lux-vision.com
+- 🐛 Issues : [GitHub Issues](https://github.com/Valerdy/Lux-Vision/issues)
+- 📖 Documentation : [Wiki](https://github.com/Valerdy/Lux-Vision/wiki)
+
+---
+
+Fait avec ❤️ par l'équipe Lux-Vision
