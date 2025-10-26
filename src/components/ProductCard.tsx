@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Heart } from 'lucide-react';
+import { ShoppingCart, Heart, Tag } from 'lucide-react';
 import { Product } from '@/data/products';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { toast } from 'sonner';
@@ -15,6 +16,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const inWishlist = isInWishlist(product.id);
+
+  const discountedPrice = product.discount
+    ? product.price - (product.price * product.discount) / 100
+    : product.price;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -34,6 +39,16 @@ const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <Link to={`/product/${product.id}`} className="group">
       <div className="gradient-card rounded-lg overflow-hidden shadow-card hover-lift relative">
+        {/* Discount Badge */}
+        {product.discount && (
+          <Badge
+            className="absolute top-2 left-2 z-10 bg-red-500 hover:bg-red-600 text-white font-bold shadow-lg"
+          >
+            <Tag className="w-3 h-3 mr-1" />
+            -{product.discount}%
+          </Badge>
+        )}
+
         {/* Wishlist Button */}
         <Button
           size="icon"
@@ -66,7 +81,22 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </h3>
           </div>
           <div className="flex items-center justify-between">
-            <p className="text-lg font-bold text-accent">{product.price.toLocaleString('fr-FR')} FCFA</p>
+            <div className="flex flex-col">
+              {product.discount ? (
+                <>
+                  <p className="text-lg font-bold text-accent">
+                    {discountedPrice.toLocaleString('fr-FR')} FCFA
+                  </p>
+                  <p className="text-xs text-muted-foreground line-through">
+                    {product.price.toLocaleString('fr-FR')} FCFA
+                  </p>
+                </>
+              ) : (
+                <p className="text-lg font-bold text-accent">
+                  {product.price.toLocaleString('fr-FR')} FCFA
+                </p>
+              )}
+            </div>
             <Button
               size="icon"
               variant="secondary"

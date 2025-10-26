@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Menu, User, Glasses } from 'lucide-react';
+import { ShoppingCart, Menu, User, Glasses, Heart } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
 const Navbar = () => {
   const { totalItems } = useCart();
+  const { totalItems: wishlistItems } = useWishlist();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -39,14 +41,24 @@ const Navbar = () => {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <Link to="/auth">
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative" aria-label="Compte utilisateur">
                 <User className="w-5 h-5" />
               </Button>
             </Link>
+            <Link to="/wishlist">
+              <Button variant="ghost" size="icon" className="relative" aria-label="Favoris">
+                <Heart className="w-5 h-5" />
+                {wishlistItems > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-glow animate-scale-in">
+                    {wishlistItems}
+                  </span>
+                )}
+              </Button>
+            </Link>
             <Link to="/cart">
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative" aria-label="Panier">
                 <ShoppingCart className="w-5 h-5" />
                 {totalItems > 0 && (
                   <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-glow animate-scale-in">
@@ -60,6 +72,7 @@ const Navbar = () => {
               size="icon"
               className="md:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Menu mobile"
             >
               <Menu className="w-5 h-5" />
             </Button>
