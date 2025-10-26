@@ -1,6 +1,7 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
+import PageBreadcrumb from '@/components/PageBreadcrumb';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { Button } from '@/components/ui/button';
 import { Heart, ShoppingCart, Trash2 } from 'lucide-react';
@@ -41,6 +42,9 @@ const Wishlist = () => {
 
       <main className="flex-1 py-8">
         <div className="container mx-auto px-4">
+          {/* Breadcrumb */}
+          <PageBreadcrumb items={[{ label: 'Favoris' }]} />
+
           {/* Header */}
           <div className="mb-8 animate-fade-in">
             <div className="flex items-center justify-between flex-wrap gap-4">

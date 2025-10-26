@@ -3,6 +3,7 @@ import { ShoppingCart, Menu, User, Glasses, Heart } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { Button } from '@/components/ui/button';
+import { ModeToggle } from '@/components/ModeToggle';
 import { useState } from 'react';
 
 const Navbar = () => {
@@ -42,6 +43,7 @@ const Navbar = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
+            <ModeToggle />
             <Link to="/auth">
               <Button variant="ghost" size="icon" className="relative" aria-label="Compte utilisateur">
                 <User className="w-5 h-5" />

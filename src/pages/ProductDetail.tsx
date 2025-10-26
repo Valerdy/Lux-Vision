@@ -7,6 +7,7 @@ import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PageBreadcrumb from '@/components/PageBreadcrumb';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -46,6 +47,14 @@ const ProductDetail = () => {
       
       <main className="flex-1 py-8">
         <div className="container mx-auto px-4">
+          {/* Breadcrumb */}
+          <PageBreadcrumb
+            items={[
+              { label: 'Boutique', href: '/shop' },
+              { label: product.name }
+            ]}
+          />
+
           <Link to="/shop" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-smooth mb-8 animate-fade-in">
             <ArrowLeft className="w-4 h-4" />
             Retour à la Boutique
