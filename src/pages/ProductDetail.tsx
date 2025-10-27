@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
+import ProductReviews from '@/components/ProductReviews';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -157,6 +158,11 @@ const ProductDetail = () => {
                 </Button>
               </div>
             </div>
+          </div>
+
+          {/* Reviews Section */}
+          <div className="mt-16">
+            <ProductReviews productId={product.id} />
           </div>
         </div>
       </main>

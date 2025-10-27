@@ -19,6 +19,8 @@ export const CACHE_EXPIRATION = parseInt(import.meta.env.VITE_CACHE_EXPIRATION |
 export const STORAGE_KEYS = {
   CART: `${STORAGE_PREFIX}cart`,
   WISHLIST: `${STORAGE_PREFIX}wishlist`,
+  COMPARE: `${STORAGE_PREFIX}compare`,
+  RECENTLY_VIEWED: `${STORAGE_PREFIX}recently_viewed`,
   USER: `${STORAGE_PREFIX}user`,
   AUTH_TOKEN: `${STORAGE_PREFIX}auth_token`,
   THEME: `${STORAGE_PREFIX}theme`,
