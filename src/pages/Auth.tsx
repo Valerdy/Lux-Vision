@@ -5,11 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 const Auth = () => {
   const navigate = useNavigate();
+  const { login, register, isLoading } = useAuth();
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [registerData, setRegisterData] = useState({
     firstName: '',
@@ -17,24 +19,50 @@ const Auth = () => {
     email: '',
     password: '',
     confirmPassword: '',
+    phone: '',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate login
-    toast.success('Connexion réussie !');
-    navigate('/');
+    setIsSubmitting(true);
+    try {
+      await login(loginData.email, loginData.password);
+      navigate('/');
+    } catch (error) {
+      // Error is already handled in AuthContext with toast
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (registerData.password !== registerData.confirmPassword) {
       toast.error('Les mots de passe ne correspondent pas');
       return;
     }
-    // Simulate registration
-    toast.success('Compte créé avec succès !');
-    navigate('/');
+
+    if (registerData.password.length < 6) {
+      toast.error('Le mot de passe doit contenir au moins 6 caractères');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await register({
+        email: registerData.email,
+        password: registerData.password,
+        firstName: registerData.firstName,
+        lastName: registerData.lastName,
+        phone: registerData.phone || undefined,
+      });
+      navigate('/');
+    } catch (error) {
+      // Error is already handled in AuthContext with toast
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -74,8 +102,14 @@ const Auth = () => {
                       required
                     />
                   </div>
-                  <Button type="submit" variant="default" size="lg" className="w-full hover-glow">
-                    Se Connecter
+                  <Button
+                    type="submit"
+                    variant="default"
+                    size="lg"
+                    className="w-full hover-glow"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Connexion...' : 'Se Connecter'}
                   </Button>
                 </form>
               </TabsContent>
@@ -140,8 +174,26 @@ const Auth = () => {
                       required
                     />
                   </div>
-                  <Button type="submit" variant="default" size="lg" className="w-full hover-glow">
-                    Créer un Compte
+                  <div>
+                    <Label htmlFor="phone">Téléphone (optionnel)</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={registerData.phone}
+                      onChange={(e) =>
+                        setRegisterData({ ...registerData, phone: e.target.value })
+                      }
+                      placeholder="+242 06 123 45 67"
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    variant="default"
+                    size="lg"
+                    className="w-full hover-glow"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Création...' : 'Créer un Compte'}
                   </Button>
                 </form>
               </TabsContent>

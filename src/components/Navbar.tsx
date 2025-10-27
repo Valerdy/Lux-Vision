@@ -1,9 +1,18 @@
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Menu, User, Glasses, Heart, GitCompare } from 'lucide-react';
+import { ShoppingCart, Menu, User, Glasses, Heart, GitCompare, LogOut, UserCircle } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useCompare } from '@/contexts/CompareContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { ModeToggle } from '@/components/ModeToggle';
 import { useState } from 'react';
 
@@ -11,6 +20,7 @@ const Navbar = () => {
   const { totalItems } = useCart();
   const { totalItems: wishlistItems } = useWishlist();
   const { totalItems: compareItems } = useCompare();
+  const { user, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -46,11 +56,51 @@ const Navbar = () => {
           {/* Actions */}
           <div className="flex items-center gap-2">
             <ModeToggle />
-            <Link to="/auth">
-              <Button variant="ghost" size="icon" className="relative" aria-label="Compte utilisateur">
-                <User className="w-5 h-5" />
-              </Button>
-            </Link>
+
+            {/* User Menu */}
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative" aria-label="Compte utilisateur">
+                    <User className="w-5 h-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium">
+                        {user?.first_name} {user?.last_name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="cursor-pointer w-full">
+                      <UserCircle className="w-4 h-4 mr-2" />
+                      Mon Profil
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/orders" className="cursor-pointer w-full">
+                      <ShoppingCart className="w-4 h-4 mr-2" />
+                      Mes Commandes
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Déconnexion
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/auth">
+                <Button variant="ghost" size="icon" className="relative" aria-label="Compte utilisateur">
+                  <User className="w-5 h-5" />
+                </Button>
+              </Link>
+            )}
             <Link to="/wishlist">
               <Button variant="ghost" size="icon" className="relative" aria-label="Favoris">
                 <Heart className="w-5 h-5" />

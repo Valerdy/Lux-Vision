@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Star, ThumbsUp, BadgeCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,24 +7,59 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { StarRating } from '@/components/StarRating';
-import { Review, getProductReviews, getAverageRating } from '@/data/reviews';
+import { reviewsAPI } from '@/services/api';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+
+interface Review {
+  id: string;
+  productId: string;
+  author: string;
+  rating: number;
+  title: string;
+  comment: string;
+  date: string;
+  verified: boolean;
+  helpful: number;
+}
 
 interface ProductReviewsProps {
   productId: string;
 }
 
 export const ProductReviews = ({ productId }: ProductReviewsProps) => {
-  const reviews = getProductReviews(productId);
-  const averageRating = getAverageRating(productId);
+  const { isAuthenticated, user } = useAuth();
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [averageRating, setAverageRating] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newReview, setNewReview] = useState({
     rating: 5,
     title: '',
     comment: '',
-    author: '',
   });
+
+  // Fetch reviews from API
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        setIsLoading(true);
+        const response = await reviewsAPI.getByProduct(productId);
+        if (response.status === 'success') {
+          setReviews(response.data.reviews);
+          setAverageRating(response.data.averageRating);
+        }
+      } catch (error: any) {
+        console.error('Error fetching reviews:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, [productId]);
 
   const ratingDistribution = [5, 4, 3, 2, 1].map(star => ({
     star,
@@ -34,17 +69,46 @@ export const ProductReviews = ({ productId }: ProductReviewsProps) => {
       : 0,
   }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!newReview.author || !newReview.title || !newReview.comment) {
+    if (!isAuthenticated) {
+      toast.error('Vous devez être connecté pour laisser un avis');
+      return;
+    }
+
+    if (!newReview.title || !newReview.comment) {
       toast.error('Veuillez remplir tous les champs');
       return;
     }
 
-    toast.success('Merci pour votre avis ! Il sera publié après modération.');
-    setShowForm(false);
-    setNewReview({ rating: 5, title: '', comment: '', author: '' });
+    try {
+      setIsSubmitting(true);
+      const response = await reviewsAPI.create({
+        productId,
+        rating: newReview.rating,
+        title: newReview.title,
+        comment: newReview.comment,
+      });
+
+      if (response.status === 'success') {
+        toast.success('Merci pour votre avis !');
+        setShowForm(false);
+        setNewReview({ rating: 5, title: '', comment: '' });
+
+        // Refresh reviews
+        const reviewsResponse = await reviewsAPI.getByProduct(productId);
+        if (reviewsResponse.status === 'success') {
+          setReviews(reviewsResponse.data.reviews);
+          setAverageRating(reviewsResponse.data.averageRating);
+        }
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Erreur lors de l\'ajout de l\'avis';
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -88,13 +152,19 @@ export const ProductReviews = ({ productId }: ProductReviewsProps) => {
 
         {/* Write Review Button */}
         <div className="mt-6">
-          <Button
-            onClick={() => setShowForm(!showForm)}
-            variant={showForm ? 'outline' : 'default'}
-            className="w-full md:w-auto"
-          >
-            {showForm ? 'Annuler' : 'Écrire un avis'}
-          </Button>
+          {isAuthenticated ? (
+            <Button
+              onClick={() => setShowForm(!showForm)}
+              variant={showForm ? 'outline' : 'default'}
+              className="w-full md:w-auto"
+            >
+              {showForm ? 'Annuler' : 'Écrire un avis'}
+            </Button>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Veuillez vous connecter pour laisser un avis
+            </p>
+          )}
         </div>
       </Card>
 
@@ -125,17 +195,6 @@ export const ProductReviews = ({ productId }: ProductReviewsProps) => {
             </div>
 
             <div>
-              <Label htmlFor="author">Votre nom *</Label>
-              <Input
-                id="author"
-                value={newReview.author}
-                onChange={e => setNewReview(prev => ({ ...prev, author: e.target.value }))}
-                placeholder="Nom complet"
-                required
-              />
-            </div>
-
-            <div>
               <Label htmlFor="title">Titre de l'avis *</Label>
               <Input
                 id="title"
@@ -143,6 +202,7 @@ export const ProductReviews = ({ productId }: ProductReviewsProps) => {
                 onChange={e => setNewReview(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="Résumez votre expérience"
                 required
+                disabled={isSubmitting}
               />
             </div>
 
@@ -155,11 +215,12 @@ export const ProductReviews = ({ productId }: ProductReviewsProps) => {
                 placeholder="Partagez votre expérience avec ce produit..."
                 rows={5}
                 required
+                disabled={isSubmitting}
               />
             </div>
 
-            <Button type="submit" className="w-full">
-              Soumettre mon avis
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? 'Envoi en cours...' : 'Soumettre mon avis'}
             </Button>
           </form>
         </Card>

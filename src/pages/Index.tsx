@@ -5,14 +5,15 @@ import heroImage from '@/assets/hero-eyewear.jpg';
 import ProductCard from '@/components/ProductCard';
 import ProductCardSkeleton from '@/components/ProductCardSkeleton';
 import RecentlyViewed from '@/components/RecentlyViewed';
-import { products } from '@/data/products';
-import { useInitialLoading } from '@/hooks/useInitialLoading';
+import { products as fallbackProducts } from '@/data/products';
+import { useProducts } from '@/hooks/useProducts';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 const Index = () => {
-  const isLoading = useInitialLoading(500);
-  const featuredProducts = products.slice(0, 4);
+  // Fetch featured products from API (limit to 4)
+  const { products, isLoading, error } = useProducts({ limit: 4 });
+  const featuredProducts = error ? fallbackProducts.slice(0, 4) : products;
 
   return (
     <div className="min-h-screen flex flex-col">
