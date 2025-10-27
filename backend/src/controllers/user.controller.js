@@ -1,213 +1,156 @@
 const { query } = require('../config/database');
 
-// Get user wishlist
+// Wishlist
 exports.getWishlist = async (req, res) => {
   try {
-    const userId = req.user.id;
-
     const result = await query(
       `SELECT p.* FROM products p
-       JOIN wishlist w ON p.id = w.product_id
+       INNER JOIN wishlist w ON p.id = w.product_id
        WHERE w.user_id = $1
        ORDER BY w.created_at DESC`,
-      [userId]
+      [req.user.id]
     );
 
-    res.status(200).json({
+    res.json({
       status: 'success',
       data: { products: result.rows }
     });
   } catch (error) {
     console.error('Get wishlist error:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Erreur lors de la récupération de la liste de souhaits'
-    });
+    res.status(500).json({ status: 'error', message: 'Erreur serveur' });
   }
 };
 
-// Add to wishlist
 exports.addToWishlist = async (req, res) => {
   try {
     const { productId } = req.body;
-    const userId = req.user.id;
 
     await query(
       'INSERT INTO wishlist (user_id, product_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
-      [userId, productId]
+      [req.user.id, productId]
     );
 
     res.status(201).json({
       status: 'success',
-      message: 'Produit ajouté à la liste de souhaits'
+      message: 'Produit ajouté aux favoris'
     });
   } catch (error) {
     console.error('Add to wishlist error:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Erreur lors de l\'ajout à la liste de souhaits'
-    });
+    res.status(500).json({ status: 'error', message: 'Erreur serveur' });
   }
 };
 
-// Remove from wishlist
 exports.removeFromWishlist = async (req, res) => {
   try {
     const { productId } = req.params;
-    const userId = req.user.id;
 
     await query(
       'DELETE FROM wishlist WHERE user_id = $1 AND product_id = $2',
-      [userId, productId]
+      [req.user.id, productId]
     );
 
-    res.status(200).json({
+    res.json({
       status: 'success',
-      message: 'Produit retiré de la liste de souhaits'
+      message: 'Produit retiré des favoris'
     });
   } catch (error) {
     console.error('Remove from wishlist error:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Erreur lors de la suppression de la liste de souhaits'
-    });
+    res.status(500).json({ status: 'error', message: 'Erreur serveur' });
   }
 };
 
-// Get cart
+// Cart
 exports.getCart = async (req, res) => {
   try {
-    const userId = req.user.id;
-
     const result = await query(
-      `SELECT p.*, c.quantity, c.id as cart_id
-       FROM products p
-       JOIN cart c ON p.id = c.product_id
+      `SELECT c.id as cart_id, c.quantity, p.* FROM cart c
+       INNER JOIN products p ON c.product_id = p.id
        WHERE c.user_id = $1
        ORDER BY c.created_at DESC`,
-      [userId]
+      [req.user.id]
     );
 
-    res.status(200).json({
+    res.json({
       status: 'success',
       data: { items: result.rows }
     });
   } catch (error) {
     console.error('Get cart error:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Erreur lors de la récupération du panier'
-    });
+    res.status(500).json({ status: 'error', message: 'Erreur serveur' });
   }
 };
 
-// Add to cart
 exports.addToCart = async (req, res) => {
   try {
     const { productId, quantity = 1 } = req.body;
-    const userId = req.user.id;
 
-    const result = await query(
-      `INSERT INTO cart (user_id, product_id, quantity)
+    await query(
+      `INSERT INTO cart (user_id, product_id, quantity) 
        VALUES ($1, $2, $3)
-       ON CONFLICT (user_id, product_id)
-       DO UPDATE SET quantity = cart.quantity + $3
-       RETURNING *`,
-      [userId, productId, quantity]
+       ON CONFLICT (user_id, product_id) 
+       DO UPDATE SET quantity = cart.quantity + $3`,
+      [req.user.id, productId, quantity]
     );
 
     res.status(201).json({
       status: 'success',
-      data: { cartItem: result.rows[0] }
+      message: 'Produit ajouté au panier'
     });
   } catch (error) {
     console.error('Add to cart error:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Erreur lors de l\'ajout au panier'
-    });
+    res.status(500).json({ status: 'error', message: 'Erreur serveur' });
   }
 };
 
-// Update cart item
 exports.updateCartItem = async (req, res) => {
   try {
     const { id } = req.params;
     const { quantity } = req.body;
-    const userId = req.user.id;
 
-    if (quantity <= 0) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'La quantité doit être supérieure à 0'
-      });
-    }
-
-    const result = await query(
-      'UPDATE cart SET quantity = $1 WHERE id = $2 AND user_id = $3 RETURNING *',
-      [quantity, id, userId]
+    await query(
+      'UPDATE cart SET quantity = $1 WHERE id = $2 AND user_id = $3',
+      [quantity, id, req.user.id]
     );
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'Article introuvable dans le panier'
-      });
-    }
-
-    res.status(200).json({
+    res.json({
       status: 'success',
-      data: { cartItem: result.rows[0] }
+      message: 'Panier mis à jour'
     });
   } catch (error) {
-    console.error('Update cart item error:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Erreur lors de la mise à jour du panier'
-    });
+    console.error('Update cart error:', error);
+    res.status(500).json({ status: 'error', message: 'Erreur serveur' });
   }
 };
 
-// Remove from cart
 exports.removeFromCart = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user.id;
 
     await query(
       'DELETE FROM cart WHERE id = $1 AND user_id = $2',
-      [id, userId]
+      [id, req.user.id]
     );
 
-    res.status(200).json({
+    res.json({
       status: 'success',
-      message: 'Article retiré du panier'
+      message: 'Produit retiré du panier'
     });
   } catch (error) {
     console.error('Remove from cart error:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Erreur lors de la suppression du panier'
-    });
+    res.status(500).json({ status: 'error', message: 'Erreur serveur' });
   }
 };
 
-// Clear cart
 exports.clearCart = async (req, res) => {
   try {
-    const userId = req.user.id;
+    await query('DELETE FROM cart WHERE user_id = $1', [req.user.id]);
 
-    await query('DELETE FROM cart WHERE user_id = $1', [userId]);
-
-    res.status(200).json({
+    res.json({
       status: 'success',
-      message: 'Panier vidé avec succès'
+      message: 'Panier vidé'
     });
   } catch (error) {
     console.error('Clear cart error:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Erreur lors du vidage du panier'
-    });
+    res.status(500).json({ status: 'error', message: 'Erreur serveur' });
   }
 };
