@@ -1,12 +1,12 @@
 import { useState, useMemo } from 'react';
-import { products } from '@/data/products';
+import { products as fallbackProducts } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
 import ProductCardSkeleton from '@/components/ProductCardSkeleton';
 import ProductFilter from '@/components/ProductFilter';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
-import { useInitialLoading } from '@/hooks/useInitialLoading';
+import { useProducts } from '@/hooks/useProducts';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,6 @@ interface FilterState {
 type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
 
 const Shop = () => {
-  const isLoading = useInitialLoading(600);
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
     genders: [],
@@ -36,60 +35,43 @@ const Shop = () => {
   const [sortBy, setSortBy] = useState<SortOption>('featured');
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Filter and search products
-  const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      // Category filter
-      const categoryMatch = filters.categories.length === 0 ||
-        filters.categories.includes(product.category);
-
-      // Gender filter
-      const genderMatch = filters.genders.length === 0 ||
-        filters.genders.includes(product.gender);
-
-      // Brand filter
-      const brandMatch = filters.brands.length === 0 ||
-        filters.brands.includes(product.brand);
-
-      // Price filter
-      const priceMatch = product.price >= filters.priceRange[0] &&
-        product.price <= filters.priceRange[1];
-
-      // Search filter
-      const searchMatch = !searchQuery ||
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase());
-
-      return categoryMatch && genderMatch && brandMatch && priceMatch && searchMatch;
-    });
-  }, [products, filters, searchQuery]);
-
-  // Sort products
-  const sortedProducts = useMemo(() => {
-    const sorted = [...filteredProducts];
-
-    switch (sortBy) {
+  // Convert sort option to API format
+  const getSortParams = (sortOption: SortOption) => {
+    switch (sortOption) {
       case 'price-asc':
-        return sorted.sort((a, b) => a.price - b.price);
+        return { sortBy: 'price', sortOrder: 'asc' as const };
       case 'price-desc':
-        return sorted.sort((a, b) => b.price - a.price);
+        return { sortBy: 'price', sortOrder: 'desc' as const };
       case 'name-asc':
-        return sorted.sort((a, b) => a.name.localeCompare(b.name));
+        return { sortBy: 'name', sortOrder: 'asc' as const };
       case 'name-desc':
-        return sorted.sort((a, b) => b.name.localeCompare(a.name));
+        return { sortBy: 'name', sortOrder: 'desc' as const };
       default:
-        return sorted; // 'featured'
+        return { sortBy: undefined, sortOrder: undefined };
     }
-  }, [filteredProducts, sortBy]);
+  };
 
-  // Paginate products
-  const totalPages = Math.ceil(sortedProducts.length / PRODUCTS_PER_PAGE);
-  const paginatedProducts = useMemo(() => {
-    const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
-    const endIndex = startIndex + PRODUCTS_PER_PAGE;
-    return sortedProducts.slice(startIndex, endIndex);
-  }, [sortedProducts, currentPage]);
+  // Fetch products from API with filters
+  const apiParams = useMemo(() => {
+    const { sortBy: sortField, sortOrder } = getSortParams(sortBy);
+    return {
+      category: filters.categories.length === 1 ? filters.categories[0] : undefined,
+      gender: filters.genders.length === 1 ? filters.genders[0] : undefined,
+      brand: filters.brands.length === 1 ? filters.brands[0] : undefined,
+      minPrice: filters.priceRange[0] || undefined,
+      maxPrice: filters.priceRange[1] || undefined,
+      search: searchQuery || undefined,
+      sortBy: sortField,
+      sortOrder,
+      page: currentPage,
+      limit: PRODUCTS_PER_PAGE,
+    };
+  }, [filters, searchQuery, sortBy, currentPage]);
+
+  const { products, isLoading, error, total, totalPages } = useProducts(apiParams);
+
+  // Fallback to local products if API fails
+  const displayProducts = error ? fallbackProducts : products;
 
   // Reset to page 1 when filters change
   const handleFilterChange = (newFilters: FilterState) => {
@@ -208,14 +190,14 @@ const Shop = () => {
               {/* Results Count */}
               <div className="mb-6 flex items-center justify-between animate-slide-right">
                 <p className="text-sm text-muted-foreground">
-                  {sortedProducts.length > 0 ? (
+                  {displayProducts.length > 0 ? (
                     <>
                       Affichage de {((currentPage - 1) * PRODUCTS_PER_PAGE) + 1}-
-                      {Math.min(currentPage * PRODUCTS_PER_PAGE, sortedProducts.length)} sur{' '}
-                      {sortedProducts.length} produit{sortedProducts.length > 1 ? 's' : ''}
+                      {Math.min(currentPage * PRODUCTS_PER_PAGE, total)} sur{' '}
+                      {total} produit{total > 1 ? 's' : ''}
                     </>
                   ) : (
-                    `Aucun produit trouvé sur ${products.length} produits`
+                    `Aucun produit trouvé`
                   )}
                 </p>
               </div>
@@ -227,10 +209,10 @@ const Shop = () => {
                     <ProductCardSkeleton key={index} />
                   ))}
                 </div>
-              ) : paginatedProducts.length > 0 ? (
+              ) : displayProducts.length > 0 ? (
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    {paginatedProducts.map((product, index) => (
+                    {displayProducts.map((product, index) => (
                       <div
                         key={product.id}
                         className="animate-scale-in"

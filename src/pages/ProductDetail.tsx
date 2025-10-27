@@ -1,19 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { products } from '@/data/products';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ShoppingCart, Check } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useRecentlyViewed } from '@/contexts/RecentlyViewedContext';
+import { useProduct } from '@/hooks/useProducts';
 import { toast } from 'sonner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
 import ProductReviews from '@/components/ProductReviews';
+import ProductCardSkeleton from '@/components/ProductCardSkeleton';
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const product = products.find((p) => p.id === id);
+  const { product, isLoading, error } = useProduct(id || '');
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
@@ -26,7 +27,24 @@ const ProductDetail = () => {
     }
   }, [product, addToRecentlyViewed]);
 
-  if (!product) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 py-8">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              <ProductCardSkeleton />
+              <ProductCardSkeleton />
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!product || error) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
