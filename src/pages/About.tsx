@@ -1,13 +1,17 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PageBreadcrumb from '@/components/PageBreadcrumb';
 
 const About = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
+
       <main className="flex-1 py-12">
         <div className="container mx-auto px-4 max-w-4xl">
+          {/* Breadcrumb */}
+          <PageBreadcrumb items={[{ label: 'À Propos' }]} />
+
           <h1 className="text-4xl font-bold mb-6 animate-fade-in">À Propos de LuxVision</h1>
           
           <div className="space-y-6 text-muted-foreground leading-relaxed">

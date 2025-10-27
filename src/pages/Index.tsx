@@ -3,11 +3,14 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Shield, Truck, RefreshCw } from 'lucide-react';
 import heroImage from '@/assets/hero-eyewear.jpg';
 import ProductCard from '@/components/ProductCard';
+import ProductCardSkeleton from '@/components/ProductCardSkeleton';
 import { products } from '@/data/products';
+import { useInitialLoading } from '@/hooks/useInitialLoading';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 const Index = () => {
+  const isLoading = useInitialLoading(500);
   const featuredProducts = products.slice(0, 4);
 
   return (
@@ -86,9 +89,13 @@ const Index = () => {
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+              {isLoading
+                ? Array.from({ length: 4 }).map((_, index) => (
+                    <ProductCardSkeleton key={index} />
+                  ))
+                : featuredProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
             </div>
             <div className="text-center animate-fade-in">
               <Link to="/shop">

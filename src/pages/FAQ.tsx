@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PageBreadcrumb from '@/components/PageBreadcrumb';
 import {
   Accordion,
   AccordionContent,
@@ -126,6 +127,9 @@ const FAQ = () => {
       <Navbar />
 
       <main className="container mx-auto px-4 py-12 md:py-20">
+        {/* Breadcrumb */}
+        <PageBreadcrumb items={[{ label: 'FAQ' }]} />
+
         {/* Header */}
         <div className="text-center mb-12 md:mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">

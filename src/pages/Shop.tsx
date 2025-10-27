@@ -1,9 +1,12 @@
 import { useState, useMemo } from 'react';
 import { products } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
+import ProductCardSkeleton from '@/components/ProductCardSkeleton';
 import ProductFilter from '@/components/ProductFilter';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PageBreadcrumb from '@/components/PageBreadcrumb';
+import { useInitialLoading } from '@/hooks/useInitialLoading';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -21,6 +24,7 @@ interface FilterState {
 type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
 
 const Shop = () => {
+  const isLoading = useInitialLoading(600);
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
     genders: [],
@@ -120,6 +124,9 @@ const Shop = () => {
 
       <main className="flex-1 py-8">
         <div className="container mx-auto px-4">
+          {/* Breadcrumb */}
+          <PageBreadcrumb items={[{ label: 'Boutique' }]} />
+
           {/* Header */}
           <div className="mb-8 animate-fade-in">
             <h1 className="text-4xl font-bold mb-2">Boutique de Lunettes</h1>
@@ -214,7 +221,13 @@ const Shop = () => {
               </div>
 
               {/* Products Grid */}
-              {paginatedProducts.length > 0 ? (
+              {isLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                  {Array.from({ length: PRODUCTS_PER_PAGE }).map((_, index) => (
+                    <ProductCardSkeleton key={index} />
+                  ))}
+                </div>
+              ) : paginatedProducts.length > 0 ? (
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     {paginatedProducts.map((product, index) => (

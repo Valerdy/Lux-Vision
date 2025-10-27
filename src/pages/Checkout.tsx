@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PageBreadcrumb from '@/components/PageBreadcrumb';
 
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
@@ -49,6 +50,14 @@ const Checkout = () => {
       
       <main className="flex-1 py-8">
         <div className="container mx-auto px-4">
+          {/* Breadcrumb */}
+          <PageBreadcrumb
+            items={[
+              { label: 'Panier', href: '/cart' },
+              { label: 'Paiement' }
+            ]}
+          />
+
           <h1 className="text-4xl font-bold mb-8 animate-fade-in">Paiement</h1>
 
           <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
