@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { products } from '@/data/products';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ShoppingCart, Check } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { useRecentlyViewed } from '@/contexts/RecentlyViewedContext';
 import { toast } from 'sonner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
+import ProductReviews from '@/components/ProductReviews';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -15,6 +17,14 @@ const ProductDetail = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
+  const { addToRecentlyViewed } = useRecentlyViewed();
+
+  // Track product view
+  useEffect(() => {
+    if (product) {
+      addToRecentlyViewed(product);
+    }
+  }, [product, addToRecentlyViewed]);
 
   if (!product) {
     return (
@@ -157,6 +167,11 @@ const ProductDetail = () => {
                 </Button>
               </div>
             </div>
+          </div>
+
+          {/* Reviews Section */}
+          <div className="mt-16">
+            <ProductReviews productId={product.id} />
           </div>
         </div>
       </main>

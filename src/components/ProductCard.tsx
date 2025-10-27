@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Heart, Tag } from 'lucide-react';
+import { ShoppingCart, Heart, Tag, GitCompare } from 'lucide-react';
 import { Product } from '@/data/products';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
+import { useCompare } from '@/contexts/CompareContext';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -15,7 +16,9 @@ interface ProductCardProps {
 const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { addToCompare, removeFromCompare, isInCompare } = useCompare();
   const inWishlist = isInWishlist(product.id);
+  const inCompare = isInCompare(product.id);
 
   const discountedPrice = product.discount
     ? product.price - (product.price * product.discount) / 100
@@ -33,6 +36,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
       removeFromWishlist(product.id);
     } else {
       addToWishlist(product);
+    }
+  };
+
+  const handleToggleCompare = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (inCompare) {
+      removeFromCompare(product.id);
+    } else {
+      addToCompare(product);
     }
   };
 
@@ -63,6 +75,20 @@ const ProductCard = ({ product }: ProductCardProps) => {
           <Heart
             className={cn('w-4 h-4', inWishlist && 'fill-current')}
           />
+        </Button>
+
+        {/* Compare Button */}
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={handleToggleCompare}
+          className={cn(
+            'absolute top-12 right-2 z-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-800 transition-all',
+            inCompare && 'text-primary hover:text-primary'
+          )}
+          aria-label={inCompare ? 'Retirer de la comparaison' : 'Ajouter à la comparaison'}
+        >
+          <GitCompare className="w-4 h-4" />
         </Button>
 
         <div className="aspect-square overflow-hidden bg-muted">

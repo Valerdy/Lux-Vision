@@ -4,6 +4,7 @@ import { ArrowRight, Shield, Truck, RefreshCw } from 'lucide-react';
 import heroImage from '@/assets/hero-eyewear.jpg';
 import ProductCard from '@/components/ProductCard';
 import ProductCardSkeleton from '@/components/ProductCardSkeleton';
+import RecentlyViewed from '@/components/RecentlyViewed';
 import { products } from '@/data/products';
 import { useInitialLoading } from '@/hooks/useInitialLoading';
 import Navbar from '@/components/Navbar';
@@ -105,6 +106,13 @@ const Index = () => {
                 </Button>
               </Link>
             </div>
+          </div>
+        </section>
+
+        {/* Recently Viewed */}
+        <section className="py-20 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <RecentlyViewed maxItems={4} />
           </div>
         </section>
 

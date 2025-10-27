@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Menu, User, Glasses, Heart } from 'lucide-react';
+import { ShoppingCart, Menu, User, Glasses, Heart, GitCompare } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
+import { useCompare } from '@/contexts/CompareContext';
 import { Button } from '@/components/ui/button';
 import { ModeToggle } from '@/components/ModeToggle';
 import { useState } from 'react';
@@ -9,6 +10,7 @@ import { useState } from 'react';
 const Navbar = () => {
   const { totalItems } = useCart();
   const { totalItems: wishlistItems } = useWishlist();
+  const { totalItems: compareItems } = useCompare();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -55,6 +57,16 @@ const Navbar = () => {
                 {wishlistItems > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-glow animate-scale-in">
                     {wishlistItems}
+                  </span>
+                )}
+              </Button>
+            </Link>
+            <Link to="/compare">
+              <Button variant="ghost" size="icon" className="relative" aria-label="Comparaison">
+                <GitCompare className="w-5 h-5" />
+                {compareItems > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-glow animate-scale-in">
+                    {compareItems}
                   </span>
                 )}
               </Button>
