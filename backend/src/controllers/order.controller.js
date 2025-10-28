@@ -76,6 +76,23 @@ exports.createOrder = async (req, res) => {
     }
 
     const result = await transaction(async (client) => {
+      // Validate stock availability for all items first
+      for (const item of items) {
+        const stockCheck = await client.query(
+          'SELECT stock_quantity, in_stock, name FROM products WHERE id = $1',
+          [item.productId]
+        );
+
+        if (stockCheck.rows.length === 0) {
+          throw new Error(`Produit ${item.productName} introuvable`);
+        }
+
+        const product = stockCheck.rows[0];
+        if (!product.in_stock || product.stock_quantity < item.quantity) {
+          throw new Error(`Stock insuffisant pour ${product.name}. Disponible: ${product.stock_quantity}, Demandé: ${item.quantity}`);
+        }
+      }
+
       // Calculate totals
       let subtotal = 0;
       for (const item of items) {
@@ -113,7 +130,7 @@ exports.createOrder = async (req, res) => {
             order_id, product_id, product_name, product_price, quantity, subtotal
           ) VALUES ($1, $2, $3, $4, $5, $6)`,
           [
-            orderId, item.productId, item.name, item.price,
+            orderId, item.productId, item.productName, item.price,
             item.quantity, item.price * item.quantity
           ]
         );

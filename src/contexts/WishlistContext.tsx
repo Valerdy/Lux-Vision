@@ -41,12 +41,17 @@ export const WishlistProvider = ({ children }: { children: React.ReactNode }) =>
     }
   }, [items, isAuthenticated]);
 
-  // Fetch wishlist from backend when user logs in
+  // Fetch wishlist from backend when user logs in and merge with local wishlist
   useEffect(() => {
-    const fetchWishlist = async () => {
+    const fetchAndMergeWishlist = async () => {
       if (isAuthenticated && !authLoading) {
         try {
           setIsLoading(true);
+
+          // Save local items before fetching
+          const localItems = [...items];
+
+          // Fetch backend wishlist
           const response = await wishlistAPI.getAll();
           if (response.status === 'success') {
             const backendItems: Product[] = response.data.products.map((item: any) => ({
@@ -66,7 +71,49 @@ export const WishlistProvider = ({ children }: { children: React.ReactNode }) =>
               inStock: item.in_stock,
               discount: item.discount,
             }));
-            setItems(backendItems);
+
+            // Merge local items with backend items
+            if (localItems.length > 0) {
+              console.log('Merging local wishlist with backend wishlist...');
+
+              // Sync local items to backend
+              for (const localItem of localItems) {
+                try {
+                  await wishlistAPI.add(localItem.id);
+                } catch (error) {
+                  console.error('Error syncing local wishlist item:', localItem.name, error);
+                }
+              }
+
+              // Fetch updated wishlist after merge
+              const updatedResponse = await wishlistAPI.getAll();
+              if (updatedResponse.status === 'success') {
+                const mergedItems: Product[] = updatedResponse.data.products.map((item: any) => ({
+                  id: item.id,
+                  name: item.name,
+                  brand: item.brand,
+                  price: item.price,
+                  image: item.images?.[0] || item.image,
+                  images: item.images || [],
+                  category: item.category,
+                  gender: item.gender,
+                  description: item.description || '',
+                  features: item.features || [],
+                  frameShape: item.frame_shape || '',
+                  material: item.material || '',
+                  color: item.color || '',
+                  inStock: item.in_stock,
+                  discount: item.discount,
+                }));
+                setItems(mergedItems);
+              }
+
+              // Clear local storage since items are now synced
+              localStorage.removeItem(STORAGE_KEYS.WISHLIST);
+            } else {
+              // No local items, just use backend items
+              setItems(backendItems);
+            }
           }
         } catch (error: any) {
           console.error('Error fetching wishlist:', error);
@@ -77,7 +124,7 @@ export const WishlistProvider = ({ children }: { children: React.ReactNode }) =>
       }
     };
 
-    fetchWishlist();
+    fetchAndMergeWishlist();
   }, [isAuthenticated, authLoading]);
 
   const addToWishlist = async (product: Product) => {

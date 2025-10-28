@@ -30,7 +30,7 @@ const createTables = async () => {
     // Products table
     await client.query(`
       CREATE TABLE IF NOT EXISTS products (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id VARCHAR(50) PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         brand VARCHAR(100) NOT NULL,
         description TEXT,
@@ -54,7 +54,7 @@ const createTables = async () => {
     await client.query(`
       CREATE TABLE IF NOT EXISTS reviews (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-        product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+        product_id VARCHAR(50) REFERENCES products(id) ON DELETE CASCADE,
         user_id UUID REFERENCES users(id) ON DELETE CASCADE,
         rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
         title VARCHAR(255) NOT NULL,
@@ -93,7 +93,7 @@ const createTables = async () => {
       CREATE TABLE IF NOT EXISTS order_items (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         order_id UUID REFERENCES orders(id) ON DELETE CASCADE,
-        product_id UUID REFERENCES products(id) ON DELETE SET NULL,
+        product_id VARCHAR(50) REFERENCES products(id) ON DELETE SET NULL,
         product_name VARCHAR(255) NOT NULL,
         product_price DECIMAL(10, 2) NOT NULL,
         quantity INTEGER NOT NULL,
@@ -107,7 +107,7 @@ const createTables = async () => {
       CREATE TABLE IF NOT EXISTS wishlist (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-        product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+        product_id VARCHAR(50) REFERENCES products(id) ON DELETE CASCADE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(user_id, product_id)
       );
@@ -118,7 +118,7 @@ const createTables = async () => {
       CREATE TABLE IF NOT EXISTS cart (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-        product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+        product_id VARCHAR(50) REFERENCES products(id) ON DELETE CASCADE,
         quantity INTEGER DEFAULT 1,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

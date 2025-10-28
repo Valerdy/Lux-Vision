@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { ordersAPI } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +13,9 @@ import PageBreadcrumb from '@/components/PageBreadcrumb';
 
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -31,12 +35,60 @@ const Checkout = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate payment processing
-    toast.success('Commande passée avec succès !');
-    clearCart();
-    navigate('/');
+
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      toast.error('Vous devez être connecté pour passer une commande');
+      navigate('/auth');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Prepare order data
+      const orderItems = items.map(item => ({
+        productId: item.id,
+        productName: item.name,
+        price: item.price,
+        quantity: item.quantity,
+      }));
+
+      const shippingAddress = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+      };
+
+      const billingAddress = shippingAddress; // Same as shipping for now
+
+      // Create order
+      const response = await ordersAPI.create({
+        items: orderItems,
+        shippingAddress,
+        billingAddress,
+        paymentMethod: 'card', // You could add radio buttons to select payment method
+      });
+
+      if (response.status === 'success') {
+        toast.success('Commande passée avec succès !');
+        clearCart();
+        navigate('/');
+      }
+    } catch (error: any) {
+      console.error('Order creation error:', error);
+      const message = error.response?.data?.message || 'Erreur lors de la création de la commande';
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (items.length === 0) {
@@ -250,8 +302,14 @@ const Checkout = () => {
                     </div>
                   </div>
                 </div>
-                <Button type="submit" variant="default" size="lg" className="w-full hover-glow">
-                  Passer la Commande
+                <Button
+                  type="submit"
+                  variant="default"
+                  size="lg"
+                  className="w-full hover-glow"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Traitement en cours...' : 'Passer la Commande'}
                 </Button>
               </div>
             </div>
