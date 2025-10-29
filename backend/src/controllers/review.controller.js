@@ -20,10 +20,16 @@ exports.getProductReviews = async (req, res) => {
       [productId]
     );
 
+    const averageRating = avgResult.rows[0].average_rating
+      ? parseFloat(avgResult.rows[0].average_rating)
+      : 0;
+
     res.status(200).json({
       status: 'success',
       data: {
         reviews: result.rows,
+        averageRating: averageRating,
+        totalReviews: parseInt(avgResult.rows[0].review_count),
         stats: avgResult.rows[0]
       }
     });
