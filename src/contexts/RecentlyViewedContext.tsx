@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { Product } from '@/data/products';
 import { STORAGE_KEYS } from '@/lib/constants';
 
@@ -22,7 +22,7 @@ export const RecentlyViewedProvider: React.FC<{ children: ReactNode }> = ({ chil
     localStorage.setItem(STORAGE_KEYS.RECENTLY_VIEWED, JSON.stringify(items));
   }, [items]);
 
-  const addToRecentlyViewed = (product: Product) => {
+  const addToRecentlyViewed = useCallback((product: Product) => {
     setItems(prev => {
       // Remove the product if it's already in the list
       const filtered = prev.filter(item => item.id !== product.id);
@@ -30,11 +30,11 @@ export const RecentlyViewedProvider: React.FC<{ children: ReactNode }> = ({ chil
       // Add to the beginning and limit to MAX_RECENT_ITEMS
       return [product, ...filtered].slice(0, MAX_RECENT_ITEMS);
     });
-  };
+  }, []);
 
-  const clearRecentlyViewed = () => {
+  const clearRecentlyViewed = useCallback(() => {
     setItems([]);
-  };
+  }, []);
 
   return (
     <RecentlyViewedContext.Provider

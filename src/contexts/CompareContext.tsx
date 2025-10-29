@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { Product } from '@/data/products';
 import { STORAGE_KEYS } from '@/lib/constants';
 import { toast } from 'sonner';
@@ -26,34 +26,36 @@ export const CompareProvider: React.FC<{ children: ReactNode }> = ({ children })
     localStorage.setItem(STORAGE_KEYS.COMPARE || 'lux-vision-compare', JSON.stringify(items));
   }, [items]);
 
-  const addToCompare = (product: Product) => {
-    if (items.length >= MAX_COMPARE_ITEMS) {
-      toast.error(`Vous pouvez comparer jusqu'à ${MAX_COMPARE_ITEMS} produits maximum`);
-      return;
-    }
+  const addToCompare = useCallback((product: Product) => {
+    setItems(prev => {
+      if (prev.length >= MAX_COMPARE_ITEMS) {
+        toast.error(`Vous pouvez comparer jusqu'à ${MAX_COMPARE_ITEMS} produits maximum`);
+        return prev;
+      }
 
-    if (items.find(item => item.id === product.id)) {
-      toast.info('Ce produit est déjà dans la comparaison');
-      return;
-    }
+      if (prev.find(item => item.id === product.id)) {
+        toast.info('Ce produit est déjà dans la comparaison');
+        return prev;
+      }
 
-    setItems(prev => [...prev, product]);
-    toast.success('Produit ajouté à la comparaison');
-  };
+      toast.success('Produit ajouté à la comparaison');
+      return [...prev, product];
+    });
+  }, []);
 
-  const removeFromCompare = (productId: string) => {
+  const removeFromCompare = useCallback((productId: string) => {
     setItems(prev => prev.filter(item => item.id !== productId));
     toast.success('Produit retiré de la comparaison');
-  };
+  }, []);
 
-  const clearCompare = () => {
+  const clearCompare = useCallback(() => {
     setItems([]);
     toast.success('Comparaison vidée');
-  };
+  }, []);
 
-  const isInCompare = (productId: string) => {
+  const isInCompare = useCallback((productId: string) => {
     return items.some(item => item.id === productId);
-  };
+  }, [items]);
 
   return (
     <CompareContext.Provider

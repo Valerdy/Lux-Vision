@@ -25,7 +25,8 @@ const ProductDetail = () => {
     if (product) {
       addToRecentlyViewed(product);
     }
-  }, [product, addToRecentlyViewed]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product?.id]); // Only depend on product ID to avoid infinite loop
 
   if (isLoading) {
     return (
