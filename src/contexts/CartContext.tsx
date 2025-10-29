@@ -37,12 +37,17 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [items, isAuthenticated]);
 
-  // Fetch cart from backend when user logs in
+  // Fetch cart from backend when user logs in and merge with local cart
   useEffect(() => {
-    const fetchCart = async () => {
+    const fetchAndMergeCart = async () => {
       if (isAuthenticated && !authLoading) {
         try {
           setIsLoading(true);
+
+          // Save local items before fetching
+          const localItems = [...items];
+
+          // Fetch backend cart
           const response = await cartAPI.getAll();
           if (response.status === 'success') {
             const backendItems: CartItem[] = response.data.items.map((item: any) => ({
@@ -63,7 +68,50 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
               quantity: item.quantity,
               cart_id: item.cart_id,
             }));
-            setItems(backendItems);
+
+            // Merge local items with backend items
+            if (localItems.length > 0) {
+              console.log('Merging local cart with backend cart...');
+
+              // Sync local items to backend
+              for (const localItem of localItems) {
+                try {
+                  await cartAPI.add(localItem.id, localItem.quantity);
+                } catch (error) {
+                  console.error('Error syncing local item:', localItem.name, error);
+                }
+              }
+
+              // Fetch updated cart after merge
+              const updatedResponse = await cartAPI.getAll();
+              if (updatedResponse.status === 'success') {
+                const mergedItems: CartItem[] = updatedResponse.data.items.map((item: any) => ({
+                  id: item.id,
+                  name: item.name,
+                  brand: item.brand,
+                  price: item.price,
+                  image: item.images?.[0] || item.image,
+                  images: item.images || [],
+                  category: item.category,
+                  gender: item.gender,
+                  description: item.description || '',
+                  features: item.features || [],
+                  frameShape: item.frame_shape || '',
+                  material: item.material || '',
+                  color: item.color || '',
+                  inStock: item.in_stock,
+                  quantity: item.quantity,
+                  cart_id: item.cart_id,
+                }));
+                setItems(mergedItems);
+              }
+
+              // Clear local storage since items are now synced
+              localStorage.removeItem('lux-vision-cart');
+            } else {
+              // No local items, just use backend items
+              setItems(backendItems);
+            }
           }
         } catch (error: any) {
           console.error('Error fetching cart:', error);
@@ -74,7 +122,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    fetchCart();
+    fetchAndMergeCart();
   }, [isAuthenticated, authLoading]);
 
   const addToCart = async (product: Product, quantity = 1) => {

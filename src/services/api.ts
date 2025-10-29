@@ -29,14 +29,28 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Clear token and redirect to login if unauthorized
+      // Clear token and redirect to auth page if unauthorized
       localStorage.removeItem('lux-vision-token');
       localStorage.removeItem('lux-vision-user');
-      window.location.href = '/login';
+      window.location.href = '/auth';
     }
     return Promise.reject(error);
   }
 );
+
+// Transform snake_case to camelCase for users
+const transformUser = (user: any) => {
+  return {
+    id: user.id,
+    email: user.email,
+    first_name: user.first_name,
+    last_name: user.last_name,
+    firstName: user.first_name,
+    lastName: user.last_name,
+    phone: user.phone,
+    role: user.role,
+  };
+};
 
 // Auth API
 export const authAPI = {
@@ -48,16 +62,28 @@ export const authAPI = {
     phone?: string;
   }) => {
     const response = await api.post('/auth/register', data);
+    // Transform user data
+    if (response.data.data?.user) {
+      response.data.data.user = transformUser(response.data.data.user);
+    }
     return response.data;
   },
 
   login: async (email: string, password: string) => {
     const response = await api.post('/auth/login', { email, password });
+    // Transform user data
+    if (response.data.data?.user) {
+      response.data.data.user = transformUser(response.data.data.user);
+    }
     return response.data;
   },
 
   getProfile: async () => {
     const response = await api.get('/auth/me');
+    // Transform user data
+    if (response.data.data?.user) {
+      response.data.data.user = transformUser(response.data.data.user);
+    }
     return response.data;
   },
 
@@ -67,6 +93,10 @@ export const authAPI = {
     phone?: string;
   }) => {
     const response = await api.put('/auth/updateprofile', data);
+    // Transform user data
+    if (response.data.data?.user) {
+      response.data.data.user = transformUser(response.data.data.user);
+    }
     return response.data;
   },
 
@@ -81,13 +111,14 @@ export const authAPI = {
 
 // Transform snake_case to camelCase for products
 const transformProduct = (product: any) => {
+  const defaultImage = 'https://images.unsplash.com/photo-1574258495973-f010dfbb5371?w=600';
   return {
     id: product.id,
     name: product.name,
     brand: product.brand,
     price: product.price,
-    image: product.images?.[0] || '/placeholder.svg',
-    images: product.images || [],
+    image: product.images?.[0] || defaultImage,
+    images: product.images || [defaultImage],
     category: product.category,
     gender: product.gender,
     description: product.description,

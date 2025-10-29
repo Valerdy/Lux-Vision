@@ -48,11 +48,14 @@ export const ProductReviews = ({ productId }: ProductReviewsProps) => {
         setIsLoading(true);
         const response = await reviewsAPI.getByProduct(productId);
         if (response.status === 'success') {
-          setReviews(response.data.reviews);
-          setAverageRating(response.data.averageRating);
+          setReviews(response.data.reviews || []);
+          setAverageRating(response.data.averageRating || 0);
         }
       } catch (error: any) {
         console.error('Error fetching reviews:', error);
+        // Set defaults if API fails
+        setReviews([]);
+        setAverageRating(0);
       } finally {
         setIsLoading(false);
       }
@@ -99,8 +102,8 @@ export const ProductReviews = ({ productId }: ProductReviewsProps) => {
         // Refresh reviews
         const reviewsResponse = await reviewsAPI.getByProduct(productId);
         if (reviewsResponse.status === 'success') {
-          setReviews(reviewsResponse.data.reviews);
-          setAverageRating(reviewsResponse.data.averageRating);
+          setReviews(reviewsResponse.data.reviews || []);
+          setAverageRating(reviewsResponse.data.averageRating || 0);
         }
       }
     } catch (error: any) {
@@ -121,9 +124,9 @@ export const ProductReviews = ({ productId }: ProductReviewsProps) => {
           {/* Average Rating */}
           <div className="text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
-              <div className="text-5xl font-bold">{averageRating.toFixed(1)}</div>
+              <div className="text-5xl font-bold">{(averageRating || 0).toFixed(1)}</div>
               <div>
-                <StarRating rating={averageRating} size="lg" />
+                <StarRating rating={averageRating || 0} size="lg" />
                 <p className="text-sm text-muted-foreground mt-1">
                   Basé sur {reviews.length} avis
                 </p>
