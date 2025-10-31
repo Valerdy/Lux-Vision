@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { ordersAPI } from '@/services/api';
@@ -16,6 +16,7 @@ const Checkout = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -31,20 +32,18 @@ const Checkout = () => {
     cvv: '',
   });
 
+  // Redirect to auth if not authenticated
+  if (!isAuthenticated) {
+    toast.error('Vous devez être connecté pour passer une commande');
+    return <Navigate to="/auth" replace />;
+  }
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Check if user is authenticated
-    if (!isAuthenticated) {
-      toast.error('Vous devez être connecté pour passer une commande');
-      navigate('/auth');
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {

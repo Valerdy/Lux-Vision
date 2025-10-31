@@ -6,7 +6,13 @@ exports.getProductReviews = async (req, res) => {
     const { productId } = req.params;
 
     const result = await query(
-      `SELECT r.*, u.first_name, u.last_name
+      `SELECT r.*,
+              CONCAT(u.first_name, ' ', u.last_name) as author,
+              r.created_at as date,
+              r.product_id as "productId",
+              r.user_id as "userId",
+              false as verified,
+              0 as helpful
        FROM reviews r
        JOIN users u ON r.user_id = u.id
        WHERE r.product_id = $1
@@ -52,19 +58,6 @@ exports.createReview = async (req, res) => {
       return res.status(400).json({
         status: 'error',
         message: 'Veuillez fournir tous les champs requis'
-      });
-    }
-
-    // Check if user already reviewed this product
-    const existing = await query(
-      'SELECT id FROM reviews WHERE product_id = $1 AND user_id = $2',
-      [productId, userId]
-    );
-
-    if (existing.rows.length > 0) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Vous avez déjà laissé un avis pour ce produit'
       });
     }
 

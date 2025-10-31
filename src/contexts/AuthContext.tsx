@@ -145,6 +145,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('lux-vision-wishlist');
 
     toast.success('Déconnexion réussie');
+
+    // Redirect to home page after a brief delay to show toast
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 500);
   };
 
   const updateProfile = async (data: UpdateProfileData) => {

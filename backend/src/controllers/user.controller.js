@@ -59,6 +59,20 @@ exports.removeFromWishlist = async (req, res) => {
   }
 };
 
+exports.clearWishlist = async (req, res) => {
+  try {
+    await query('DELETE FROM wishlist WHERE user_id = $1', [req.user.id]);
+
+    res.json({
+      status: 'success',
+      message: 'Favoris vidés'
+    });
+  } catch (error) {
+    console.error('Clear wishlist error:', error);
+    res.status(500).json({ status: 'error', message: 'Erreur serveur' });
+  }
+};
+
 // Cart
 exports.getCart = async (req, res) => {
   try {

@@ -264,6 +264,11 @@ export const wishlistAPI = {
     const response = await api.delete(`/users/wishlist/${productId}`);
     return response.data;
   },
+
+  clear: async () => {
+    const response = await api.delete('/users/wishlist');
+    return response.data;
+  },
 };
 
 // Cart API

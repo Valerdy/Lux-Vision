@@ -175,9 +175,23 @@ export const WishlistProvider = ({ children }: { children: React.ReactNode }) =>
     return items.some(item => item.id === productId);
   };
 
-  const clearWishlist = () => {
-    setItems([]);
-    toast.success('Favoris vidés');
+  const clearWishlist = async () => {
+    if (isAuthenticated) {
+      try {
+        setIsLoading(true);
+        await wishlistAPI.clear();
+        setItems([]);
+        toast.success('Favoris vidés');
+      } catch (error: any) {
+        toast.error('Erreur lors du vidage des favoris');
+        console.error('Clear wishlist error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      setItems([]);
+      toast.success('Favoris vidés');
+    }
   };
 
   const totalItems = items.length;

@@ -34,8 +34,6 @@ const Wishlist = () => {
     toast.success(`${items.length} produit${items.length > 1 ? 's' : ''} ajouté${items.length > 1 ? 's' : ''} au panier`);
   };
 
-  const totalValue = items.reduce((sum, item) => sum + item.price, 0);
-
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
@@ -112,7 +110,7 @@ const Wishlist = () => {
 
           {/* Stats Cards */}
           {totalItems > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 animate-slide-down">
+            <div className="grid grid-cols-1 gap-4 mb-8 animate-slide-down">
               <div className="gradient-card rounded-lg p-6 shadow-card">
                 <div className="flex items-center justify-between">
                   <div>
@@ -120,32 +118,6 @@ const Wishlist = () => {
                     <p className="text-3xl font-bold">{totalItems}</p>
                   </div>
                   <Heart className="w-12 h-12 text-red-500/20" />
-                </div>
-              </div>
-
-              <div className="gradient-card rounded-lg p-6 shadow-card">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Valeur Totale</p>
-                    <p className="text-3xl font-bold">
-                      {totalValue.toLocaleString('fr-FR')} FCFA
-                    </p>
-                  </div>
-                  <ShoppingCart className="w-12 h-12 text-primary/20" />
-                </div>
-              </div>
-
-              <div className="gradient-card rounded-lg p-6 shadow-card">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Prix Moyen</p>
-                    <p className="text-3xl font-bold">
-                      {Math.round(totalValue / totalItems).toLocaleString('fr-FR')} FCFA
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
-                    <span className="text-2xl font-bold text-accent">~</span>
-                  </div>
                 </div>
               </div>
             </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Star, ThumbsUp, BadgeCheck } from 'lucide-react';
+import { Star, ThumbsUp, BadgeCheck, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 interface Review {
   id: string;
   productId: string;
+  userId: string;
   author: string;
   rating: number;
   title: string;
@@ -111,6 +112,29 @@ export const ProductReviews = ({ productId }: ProductReviewsProps) => {
       toast.error(message);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (reviewId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet avis ?')) {
+      return;
+    }
+
+    try {
+      const response = await reviewsAPI.delete(reviewId);
+      if (response.status === 'success') {
+        toast.success('Avis supprimé avec succès');
+
+        // Refresh reviews
+        const reviewsResponse = await reviewsAPI.getByProduct(productId);
+        if (reviewsResponse.status === 'success') {
+          setReviews(reviewsResponse.data.reviews || []);
+          setAverageRating(reviewsResponse.data.averageRating || 0);
+        }
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Erreur lors de la suppression de l\'avis';
+      toast.error(message);
     }
   };
 
@@ -248,7 +272,13 @@ export const ProductReviews = ({ productId }: ProductReviewsProps) => {
                   <h5 className="font-semibold text-lg">{review.title}</h5>
                 </div>
                 <span className="text-sm text-muted-foreground whitespace-nowrap">
-                  {new Date(review.date).toLocaleDateString('fr-FR')}
+                  {new Date(review.date).toLocaleDateString('fr-FR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
                 </span>
               </div>
 
@@ -256,14 +286,27 @@ export const ProductReviews = ({ productId }: ProductReviewsProps) => {
 
               <div className="flex items-center justify-between pt-3 border-t">
                 <p className="text-sm font-medium">{review.author}</p>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-2 text-muted-foreground hover:text-foreground"
-                >
-                  <ThumbsUp className="w-4 h-4" />
-                  Utile ({review.helpful})
-                </Button>
+                <div className="flex items-center gap-2">
+                  {user && user.id === review.userId && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(review.id)}
+                      className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Supprimer
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2 text-muted-foreground hover:text-foreground"
+                  >
+                    <ThumbsUp className="w-4 h-4" />
+                    Utile ({review.helpful})
+                  </Button>
+                </div>
               </div>
             </Card>
           ))}
