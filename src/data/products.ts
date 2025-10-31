@@ -14,6 +14,8 @@ export interface Product {
   color: string;
   inStock?: boolean;
   discount?: number;
+  rating?: number;
+  reviewCount?: number;
 }
 
 export const products: Product[] = [

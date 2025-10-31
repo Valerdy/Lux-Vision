@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Heart, Tag, GitCompare } from 'lucide-react';
+import { ShoppingCart, Heart, Tag, GitCompare, Star } from 'lucide-react';
 import { Product } from '@/data/products';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -105,6 +105,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
             <h3 className="font-semibold text-foreground group-hover:text-accent transition-smooth">
               {product.name}
             </h3>
+            {product.rating !== undefined && product.rating > 0 && (
+              <div className="flex items-center gap-1 mt-1">
+                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                <span className="text-xs font-medium">{product.rating.toFixed(1)}</span>
+                {product.reviewCount !== undefined && product.reviewCount > 0 && (
+                  <span className="text-xs text-muted-foreground">({product.reviewCount})</span>
+                )}
+              </div>
+            )}
           </div>
           <div className="flex items-center justify-between">
             <div className="flex flex-col">

@@ -170,15 +170,19 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       const item = items.find(i => i.id === productId);
       if (!item?.cart_id) return;
 
+      // Store item for reverting on error
+      const removedItem = item;
+
+      // Optimistic update - remove from UI immediately
+      setItems(currentItems => currentItems.filter(item => item.id !== productId));
+
       try {
-        setIsLoading(true);
         await cartAPI.remove(item.cart_id);
-        setItems(currentItems => currentItems.filter(item => item.id !== productId));
       } catch (error: any) {
+        // Revert on error
+        setItems(currentItems => [...currentItems, removedItem]);
         toast.error('Erreur lors de la suppression du panier');
         console.error('Remove from cart error:', error);
-      } finally {
-        setIsLoading(false);
       }
     } else {
       setItems(currentItems => currentItems.filter(item => item.id !== productId));
@@ -195,19 +199,27 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       const item = items.find(i => i.id === productId);
       if (!item?.cart_id) return;
 
+      // Store old quantity for reverting on error
+      const oldQuantity = item.quantity;
+
+      // Optimistic update - update UI immediately
+      setItems(currentItems =>
+        currentItems.map(item =>
+          item.id === productId ? { ...item, quantity } : item
+        )
+      );
+
       try {
-        setIsLoading(true);
         await cartAPI.update(item.cart_id, quantity);
+      } catch (error: any) {
+        // Revert on error
         setItems(currentItems =>
           currentItems.map(item =>
-            item.id === productId ? { ...item, quantity } : item
+            item.id === productId ? { ...item, quantity: oldQuantity } : item
           )
         );
-      } catch (error: any) {
         toast.error('Erreur lors de la mise à jour du panier');
         console.error('Update cart error:', error);
-      } finally {
-        setIsLoading(false);
       }
     } else {
       setItems(currentItems =>
